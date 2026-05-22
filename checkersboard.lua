@@ -47,6 +47,8 @@ local Board = FrameContainer:extend{
     show_selected = true,
     previous_move_hints = false,
     opponent_hints = false,
+    color_board_light = "#f5d478",
+    color_board_dark  = "#7a5a01",
     selected = nil,
     _peek_square = nil,
     _hint_squares = nil,
@@ -64,6 +66,10 @@ function Board:init()
         error("Checkers Board: must be initialized with a Game object")
         return
     end
+
+    -- Ensure colors are copied if they were passed in new()
+    self.color_board_light = self.color_board_light or "#f5d478"
+    self.color_board_dark  = self.color_board_dark or "#7a5a01"
 
     local margins = self:allMarginSizes()
     local bt_pad_v = Screen:scaleBySize(4)
@@ -155,12 +161,19 @@ function Board:createSquareButton(file, rank)
 end
 
 function Board:applySquareColors()
+    local color_light = Blitbuffer.colorFromString(self.color_board_light or "#f5d478")
+    local color_dark  = Blitbuffer.colorFromString(self.color_board_dark or "#7a5a01")
+
     for rank = 0, BOARD_SIZE - 1 do
         for file = 0, BOARD_SIZE - 1 do
             local button = self.table:getButtonById(Board.toId(file, rank))
-            local color = Board.positionToColor(Board.idToPosition(Board.toId(file, rank)))
-            button.frame.background = color
-            button.frame.border_color = color
+            if button then
+                local color = ((file + rank) % 2 == 1)
+                    and color_light
+                    or color_dark
+                button.frame.background = color
+                button.frame.border_color = color
+            end
         end
     end
 end
@@ -601,7 +614,7 @@ function Board:placePiece(sq, piece, color)
     end
     local button = self.table:getButtonById(id)
     button:setIcon(icon, self.button_size)
-    local color_value = Board.positionToColor(sq)
+    local color_value = Board.positionToColor(self, sq)
     button.frame.background = color_value
     button.frame.border_color = color_value
 end
@@ -645,11 +658,16 @@ function Board.idToPosition(id)
     return string.char(string.byte("a") + file) .. tostring(rank + 1)
 end
 
-function Board.positionToColor(position)
+function Board.positionToColor(self, position)
     local id = Board.chessToId(position)
+    if not id then return nil end
     local file = math.floor((id - 1) / BOARD_SIZE)
     local rank = (id - 1) % BOARD_SIZE
-    return (file + rank) % 2 == 0 and Blitbuffer.COLOR_DARK_GRAY or Blitbuffer.COLOR_LIGHT_GRAY
+    
+    local color_light = Blitbuffer.colorFromString(self and self.color_board_light or "#f5d478")
+    local color_dark  = Blitbuffer.colorFromString(self and self.color_board_dark or "#7a5a01")
+    
+    return (file + rank) % 2 == 1 and color_light or color_dark
 end
 
 function Board:allMarginSizes()
