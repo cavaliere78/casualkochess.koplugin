@@ -302,7 +302,7 @@ function Board:handleMoveFlags(move, to)
 
     if move.flags == Chess.FLAGS.EP_CAPTURE then
         local captured_pawn_rank_offset = (move.color == Chess.BLACK and 1 or -1)
-        local captured_pawn_id = to_id + captured_pawn_rank_offset * BOARD_SIZE 
+        local captured_pawn_id = to_id + captured_pawn_rank_offset --C78 * BOARD_SIZE 
         local captured_pawn_square_result = Board.idToPosition(captured_pawn_id)
         if captured_pawn_square_result then
             self:updateSquare(captured_pawn_square_result)
