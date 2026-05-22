@@ -7,6 +7,7 @@ local Chess = require("chess/src/chess")
 local Device = require("device")
 local Screen = Device.screen
 local UIManager = require("ui/uimanager")
+local Utils = require("utils")
 
 local OverlapGroup = require("ui/widget/overlapgroup")
 local IconWidget   = require("ui/widget/iconwidget")
@@ -42,8 +43,8 @@ local Board = FrameContainer:extend{
     check_hints = false,
     flipped = false,
     rotate_top_pieces = false,
-    color_board_light = "#f5d478",
-    color_board_dark  = "#7a5a01",
+    color_board_light = Utils.DEFAULT_BOARD_LIGHT,
+    color_board_dark  = Utils.DEFAULT_BOARD_DARK,
     _hint_squares  = nil,
     _previous_move_squares = nil,
     _check_square = nil,
@@ -61,8 +62,8 @@ function Board:init()
     end
 
     -- Ensure colors are copied if they were passed in new()
-    self.color_board_light = self.color_board_light or "#f5d478"
-    self.color_board_dark  = self.color_board_dark or "#7a5a01"
+    self.color_board_light = self.color_board_light or Utils.DEFAULT_BOARD_LIGHT
+    self.color_board_dark  = self.color_board_dark or Utils.DEFAULT_BOARD_DARK
 
     local margins = self:allMarginSizes()
     -- ButtonTable applies vertical padding inside each square; keep icons square.
@@ -163,8 +164,8 @@ function Board:createSquareButton(file, rank)
 end
 
 function Board:applySquareColors()
-    local color_light = Blitbuffer.colorFromString(self.color_board_light or "#f5d478")
-    local color_dark  = Blitbuffer.colorFromString(self.color_board_dark or "#7a5a01")
+    local color_light = Blitbuffer.colorFromString(self.color_board_light or Utils.DEFAULT_BOARD_LIGHT)
+    local color_dark  = Blitbuffer.colorFromString(self.color_board_dark or Utils.DEFAULT_BOARD_DARK)
 
     for rank = 0, BOARD_SIZE - 1 do
         for file = 0, BOARD_SIZE - 1 do
@@ -709,8 +710,8 @@ function Board.positionToColor(self, position)
             local file_idx = string.byte(file_char) - string.byte('a')
             local rank_idx = tonumber(rank_char) - 1
             
-            local light = self and self.color_board_light or "#f5d478"
-            local dark = self and self.color_board_dark or "#7a5a01"
+            local light = self and self.color_board_light or Utils.DEFAULT_BOARD_LIGHT
+            local dark = self and self.color_board_dark or Utils.DEFAULT_BOARD_DARK
             local color_light = Blitbuffer.colorFromString(light)
             local color_dark  = Blitbuffer.colorFromString(dark)
             

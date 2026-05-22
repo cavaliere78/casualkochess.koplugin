@@ -11,6 +11,7 @@ local ButtonWidget = require("ui/widget/button")
 local FrameContainer = require("ui/widget/container/framecontainer")
 local MovableContainer = require("ui/widget/container/movablecontainer")
 local ConfirmBox = require("ui/widget/confirmbox")
+local Utils = require("utils")
 
 local _ = require("gettext")
 
@@ -37,8 +38,8 @@ function InterfaceWidget:new(opts)
             check_hints = init.check_hints == true,
             rotate_top_pieces = init.rotate_top_pieces == true,
             thinking_indicator = init.thinking_indicator ~= false,
-            color_board_light = init.color_board_light or "#f5d478",
-            color_board_dark  = init.color_board_dark or "#7a5a01",
+            color_board_light = init.color_board_light or Utils.DEFAULT_BOARD_LIGHT,
+            color_board_dark  = init.color_board_dark or Utils.DEFAULT_BOARD_DARK,
         },
     }, InterfaceWidget)
 end
@@ -282,8 +283,8 @@ function InterfaceWidget:resetToDefaults()
     self.changes.check_hints = false
     self.changes.rotate_top_pieces = false
     self.changes.thinking_indicator = true
-    self.changes.color_board_light = "#f5d478"
-    self.changes.color_board_dark  = "#7a5a01"
+    self.changes.color_board_light = Utils.DEFAULT_BOARD_LIGHT
+    self.changes.color_board_dark  = Utils.DEFAULT_BOARD_DARK
     self:saveAndClose()
 end
 

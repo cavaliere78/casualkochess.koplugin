@@ -48,6 +48,7 @@ local Uci = require("uci")
 local GoldfishUCI = require("goldfishuci")
 local SettingsWidget = require("settingswidget")
 local Weakening = require("weakening")
+local Utils = require("utils")
 local _ = require("gettext")
 
 local function getPluginPath()
@@ -753,8 +754,8 @@ function Kochess:initializeBoard(board_h)
         check_hints = self:getSetting("check_hints", false),
         flipped = self:shouldFlipBoard(),
         rotate_top_pieces = self:getSetting("rotate_top_pieces", false),
-        color_board_light = self:getSetting("color_board_light", "#f5d478"),
-        color_board_dark  = self:getSetting("color_board_dark", "#7a5a01"),
+        color_board_light = self:getSetting("color_board_light", Utils.DEFAULT_BOARD_LIGHT),
+        color_board_dark  = self:getSetting("color_board_dark", Utils.DEFAULT_BOARD_DARK),
     }
 end
 

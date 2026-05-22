@@ -58,6 +58,9 @@ end)
 
 local Utils = {}
 
+Utils.DEFAULT_BOARD_LIGHT = "#f5d478"
+Utils.DEFAULT_BOARD_DARK  = "#7a5a01"
+
 function Utils.pollingLoop(interval_s, action, condition)
     local loop
     loop = function()

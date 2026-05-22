@@ -24,6 +24,7 @@ local Chess = require("chessgame")
 local EngineWidget = require("enginewidget")
 local InterfaceWidget = require("interfacewidget")
 local _ = require("gettext")
+local Utils = require("utils")
 
 local BACKGROUND_COLOR = Blitbuffer.COLOR_WHITE
 local MODE_CHESS = "chess"
@@ -102,8 +103,8 @@ function SettingsWidget:initializeState()
         check_hints = (self.parent and self.parent.board and self.parent.board.check_hints == true) or false,
         rotate_top_pieces = (self.parent and self.parent.board and self.parent.board.rotate_top_pieces == true) or false,
         thinking_indicator = not (self.parent and self.parent.getSetting and self.parent:getSetting("thinking_indicator", true) == false),
-        color_board_light = (self.parent and self.parent.getSetting and self.parent:getSetting("color_board_light", "#f5d478")) or "#f5d478",
-        color_board_dark  = (self.parent and self.parent.getSetting and self.parent:getSetting("color_board_dark", "#7a5a01")) or "#7a5a01",
+        color_board_light = (self.parent and self.parent.getSetting and self.parent:getSetting("color_board_light", Utils.DEFAULT_BOARD_LIGHT)) or Utils.DEFAULT_BOARD_LIGHT,
+        color_board_dark  = (self.parent and self.parent.getSetting and self.parent:getSetting("color_board_dark", Utils.DEFAULT_BOARD_DARK)) or Utils.DEFAULT_BOARD_DARK,
         time_control = {
             [Chess.WHITE] = {
                 base_minutes  = self.timer.base[Chess.WHITE] / 60,

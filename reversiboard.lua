@@ -5,6 +5,7 @@ local FrameContainer = require("ui/widget/container/framecontainer")
 local Device = require("device")
 local Screen = Device.screen
 local UIManager = require("ui/uimanager")
+local Utils = require("utils")
 local IconWidget = require("ui/widget/iconwidget")
 local OverlapGroup = require("ui/widget/overlapgroup")
 local Reversi = require("reversigame")
@@ -35,8 +36,8 @@ local Board = FrameContainer:extend{
     show_selected = true,
     previous_move_hints = false,
     opponent_hints = false,
-    color_board_light = "#f5d478",
-    color_board_dark  = "#7a5a01",
+    color_board_light = Utils.DEFAULT_BOARD_LIGHT,
+    color_board_dark  = Utils.DEFAULT_BOARD_DARK,
     selected = nil,
     _peek_square = nil,
     _hint_squares = nil,
@@ -51,8 +52,8 @@ function Board:init()
     if not self.game then error("Reversi Board: must be initialized with a Game object") end
 
     -- Ensure colors are copied if they were passed in new()
-    self.color_board_light = self.color_board_light or "#f5d478"
-    self.color_board_dark  = self.color_board_dark or "#7a5a01"
+    self.color_board_light = self.color_board_light or Utils.DEFAULT_BOARD_LIGHT
+    self.color_board_dark  = self.color_board_dark or Utils.DEFAULT_BOARD_DARK
 
     local margins = self:allMarginSizes()
     local bt_pad_v = Screen:scaleBySize(4)
@@ -138,8 +139,8 @@ function Board:createSquareButton(file, rank)
 end
 
 function Board:applySquareColors()
-    local color_light = Blitbuffer.colorFromString(self.color_board_light or "#f5d478")
-    local color_dark  = Blitbuffer.colorFromString(self.color_board_dark or "#7a5a01")
+    local color_light = Blitbuffer.colorFromString(self.color_board_light or Utils.DEFAULT_BOARD_LIGHT)
+    local color_dark  = Blitbuffer.colorFromString(self.color_board_dark or Utils.DEFAULT_BOARD_DARK)
 
     for rank = 0, BOARD_SIZE - 1 do
         for file = 0, BOARD_SIZE - 1 do
@@ -357,8 +358,8 @@ function Board.positionToColor(self, position)
     local file = math.floor((id - 1) / BOARD_SIZE)
     local rank = (id - 1) % BOARD_SIZE
     
-    local color_light = Blitbuffer.colorFromString(self and self.color_board_light or "#f5d478")
-    local color_dark  = Blitbuffer.colorFromString(self and self.color_board_dark or "#7a5a01")
+    local color_light = Blitbuffer.colorFromString(self and self.color_board_light or Utils.DEFAULT_BOARD_LIGHT)
+    local color_dark  = Blitbuffer.colorFromString(self and self.color_board_dark or Utils.DEFAULT_BOARD_DARK)
     
     return (file + rank) % 2 == 1 and color_light or color_dark
 end
