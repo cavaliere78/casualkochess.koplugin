@@ -24,6 +24,7 @@ function InterfaceWidget:new(opts)
     assert(opts.onSave, "onSave callback is required")
 
     local init = opts.initial or {}
+    
     return setmetatable({
         parent = opts.parent,
         onSave = opts.onSave,
@@ -36,6 +37,8 @@ function InterfaceWidget:new(opts)
             check_hints = init.check_hints == true,
             rotate_top_pieces = init.rotate_top_pieces == true,
             thinking_indicator = init.thinking_indicator ~= false,
+            color_board_light = init.color_board_light or "#f5d478",
+            color_board_dark  = init.color_board_dark or "#7a5a01",
         },
     }, InterfaceWidget)
 end
@@ -61,6 +64,75 @@ function InterfaceWidget:markDirty()
         self.dialog:_buttons_edit_callback(true)
     end
     UIManager:setDirty(self.parent, "ui")
+end
+
+local COLORS = {"#f5d478", "#FFFFFF", "#D3D3D3", "#7a5a01", "#000000"}
+
+function InterfaceWidget:cycleColor(key)
+    local current = self.changes[key]
+    local idx = 1
+    for i, c in ipairs(COLORS) do
+        if c == current then
+            idx = i
+            break
+        end
+    end
+    idx = (idx % #COLORS) + 1
+    local new_color = COLORS[idx]
+
+    self.changes[key] = new_color
+
+    if self.parent and self.parent.board then
+        self.parent.board[key] = new_color
+        if self.parent.board.applySquareColors then
+            self.parent.board:applySquareColors()
+        end
+        self.parent.board:updateBoard()
+    end
+
+    self:assembleContent()
+    self.dialog:init()
+    UIManager:setDirty(self.parent, "ui")
+end
+
+
+function InterfaceWidget:buildColorOptions()
+    local w = self.dialog.element_width
+    local gap = VerticalSpan:new{ width = Size.padding.small }
+
+    local function colorButton(key, label)
+        local _self = self
+        return ButtonWidget:new{
+            text = label,
+            width = w,
+            callback = function()
+                local input = InputDialog:new{
+                    title = label,
+                    input = _self.changes[key] or "#FFFFFF",
+                    save_callback = function(text)
+                        _self.changes[key] = text
+                        if _self.parent and _self.parent.board then
+                            _self.parent.board[key] = text
+                            if _self.parent.board.applySquareColors then
+                                _self.parent.board:applySquareColors()
+                            end
+                            _self.parent.board:updateBoard()
+                        end
+                        _self:markDirty()
+                        UIManager:setDirty(_self.parent, "ui")
+                    end,
+                }
+                UIManager:show(input)
+            end,
+        }
+    end
+
+    self.colorOptionsGroup = VerticalGroup:new{
+        align = "left",
+        colorButton("color_board_light", _("Board Light")),
+        gap,
+        colorButton("color_board_dark", _("Board Dark")),
+    }
 end
 
 function InterfaceWidget:buttonLabel(key, label_text)
@@ -134,6 +206,11 @@ end
 
 function InterfaceWidget:assembleContent()
     local D = self.dialog
+    
+    -- Safe initialization
+    if not self.optionsGroup then self:buildOptions() end
+    if not self.colorOptionsGroup then self:buildColorOptions() end
+
     local content = FrameContainer:new{
         radius = Size.radius.window,
         bordersize = Size.border.window,
@@ -150,6 +227,13 @@ function InterfaceWidget:assembleContent()
             CenterContainer:new{
                 dimen = Geometry:new{ w = D.width, h = self.optionsGroup:getSize().h },
                 self.optionsGroup,
+            },
+
+            VerticalSpan:new{ width = Size.padding.large },
+
+            CenterContainer:new{
+                dimen = Geometry:new{ w = D.width, h = self.colorOptionsGroup:getSize().h },
+                self.colorOptionsGroup,
             },
 
             VerticalSpan:new{ width = Size.padding.large },
@@ -198,6 +282,8 @@ function InterfaceWidget:resetToDefaults()
     self.changes.check_hints = false
     self.changes.rotate_top_pieces = false
     self.changes.thinking_indicator = true
+    self.changes.color_board_light = "#f5d478"
+    self.changes.color_board_dark  = "#7a5a01"
     self:saveAndClose()
 end
 

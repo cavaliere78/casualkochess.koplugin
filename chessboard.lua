@@ -42,6 +42,8 @@ local Board = FrameContainer:extend{
     check_hints = false,
     flipped = false,
     rotate_top_pieces = false,
+    color_board_light = "#f5d478",
+    color_board_dark  = "#7a5a01",
     _hint_squares  = nil,
     _previous_move_squares = nil,
     _check_square = nil,
@@ -57,6 +59,10 @@ function Board:init()
         error("Kochess Board: must be initialized with a Game object")
         return
     end
+
+    -- Ensure colors are copied if they were passed in new()
+    self.color_board_light = self.color_board_light or "#f5d478"
+    self.color_board_dark  = self.color_board_dark or "#7a5a01"
 
     local margins = self:allMarginSizes()
     -- ButtonTable applies vertical padding inside each square; keep icons square.
@@ -157,15 +163,20 @@ function Board:createSquareButton(file, rank)
 end
 
 function Board:applySquareColors()
+    local color_light = Blitbuffer.colorFromString(self.color_board_light or "#f5d478")
+    local color_dark  = Blitbuffer.colorFromString(self.color_board_dark or "#7a5a01")
+
     for rank = 0, BOARD_SIZE - 1 do
         for file = 0, BOARD_SIZE - 1 do
             local button = self.table:getButtonById(Board.toId(file, rank))
-            local color = ((file + rank) % 2 == 1)
-                and Blitbuffer.COLOR_LIGHT_GRAY
-                or Blitbuffer.COLOR_DARK_GRAY
+            if button then
+                local color = ((file + rank) % 2 == 1)
+                    and color_light
+                    or color_dark
             
-            button.frame.background = color
-            button.frame.border_color = color
+                button.frame.background = color
+                button.frame.border_color = color
+            end
         end
     end
 end
@@ -631,7 +642,7 @@ function Board:placePiece(square, piece, color)
     local button = self.table:getButtonById(id_result)
     button:setIcon(icon, self.button_size)
 
-    local original_color = Board.positionToColor(square)
+    local original_color = Board.positionToColor(self, square)
     button.frame.background = original_color
     button.frame.border_color = original_color
 
@@ -690,14 +701,20 @@ function Board.idToPosition(id)
     return nil
 end
 
-function Board.positionToColor(position)
+function Board.positionToColor(self, position)
     if type(position) == "string" and #position == 2 then
         local file_char = position:sub(1, 1)
         local rank_char = position:sub(2, 2)
         if 'a' <= file_char and file_char <= 'h' and '1' <= rank_char and rank_char <= '8' then
             local file_idx = string.byte(file_char) - string.byte('a')
             local rank_idx = tonumber(rank_char) - 1
-            return (file_idx + rank_idx) % 2 == 1 and Blitbuffer.COLOR_LIGHT_GRAY or Blitbuffer.COLOR_DARK_GRAY
+            
+            local light = self and self.color_board_light or "#f5d478"
+            local dark = self and self.color_board_dark or "#7a5a01"
+            local color_light = Blitbuffer.colorFromString(light)
+            local color_dark  = Blitbuffer.colorFromString(dark)
+            
+            return (file_idx + rank_idx) % 2 == 1 and color_light or color_dark
         end
     end
     return nil 

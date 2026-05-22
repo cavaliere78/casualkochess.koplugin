@@ -102,6 +102,8 @@ function SettingsWidget:initializeState()
         check_hints = (self.parent and self.parent.board and self.parent.board.check_hints == true) or false,
         rotate_top_pieces = (self.parent and self.parent.board and self.parent.board.rotate_top_pieces == true) or false,
         thinking_indicator = not (self.parent and self.parent.getSetting and self.parent:getSetting("thinking_indicator", true) == false),
+        color_board_light = (self.parent and self.parent.getSetting and self.parent:getSetting("color_board_light", "#f5d478")) or "#f5d478",
+        color_board_dark  = (self.parent and self.parent.getSetting and self.parent:getSetting("color_board_dark", "#7a5a01")) or "#7a5a01",
         time_control = {
             [Chess.WHITE] = {
                 base_minutes  = self.timer.base[Chess.WHITE] / 60,
@@ -505,6 +507,8 @@ function SettingsWidget:buildInterfaceButton()
                     check_hints = self.changes.check_hints,
                     rotate_top_pieces = self.changes.rotate_top_pieces,
                     thinking_indicator = self.changes.thinking_indicator,
+                    color_board_light = self.changes.color_board_light,
+                    color_board_dark  = self.changes.color_board_dark,
                 },
                 onSave = function(saved)
                     self.changes.show_selected = saved.show_selected
@@ -514,6 +518,8 @@ function SettingsWidget:buildInterfaceButton()
                     self.changes.check_hints = saved.check_hints
                     self.changes.rotate_top_pieces = saved.rotate_top_pieces
                     self.changes.thinking_indicator = saved.thinking_indicator
+                    self.changes.color_board_light = saved.color_board_light
+                    self.changes.color_board_dark  = saved.color_board_dark
                     self:applyInterfaceChanges(saved)
                     self:markDirty()
                     UIManager:setDirty(self.parent, "ui")
@@ -545,6 +551,12 @@ function SettingsWidget:applyInterfaceChanges(s)
         if not board.show_selected and board.selected then
             board:unmarkSelected(board.selected)
         end
+        board.color_board_light = s.color_board_light
+        board.color_board_dark  = s.color_board_dark
+        if board.applySquareColors then
+            board:applySquareColors()
+        end
+        board:updateBoard()
     end
     if self.parent and self.parent.setSetting then
         local p = self.parent
@@ -555,6 +567,8 @@ function SettingsWidget:applyInterfaceChanges(s)
         p:setSetting("check_hints", s.check_hints and true or false)
         p:setSetting("rotate_top_pieces", s.rotate_top_pieces and true or false)
         p:setSetting("thinking_indicator", s.thinking_indicator ~= false)
+        p:setSetting("color_board_light", s.color_board_light)
+        p:setSetting("color_board_dark", s.color_board_dark)
     end
 end
 
@@ -733,6 +747,8 @@ function SettingsWidget:applyAndClose()
         p:setSetting("check_hints", s.check_hints and true or false)
         p:setSetting("rotate_top_pieces", s.rotate_top_pieces and true or false)
         p:setSetting("thinking_indicator", s.thinking_indicator ~= false)
+        p:setSetting("color_board_light", self.changes.color_board_light)
+        p:setSetting("color_board_dark", self.changes.color_board_dark)
         local wc = s.time_control[Chess.WHITE]
         local bc = s.time_control[Chess.BLACK]
         p:setSetting("time_base_white", wc.base_minutes * 60)
@@ -744,6 +760,7 @@ function SettingsWidget:applyAndClose()
     if self.parent and self.parent.updateBoardOrientation then
         self.parent:updateBoardOrientation()
     end
+    
     self.onApply(s)
     UIManager:close(self.dialog)
 end
