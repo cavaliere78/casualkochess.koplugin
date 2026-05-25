@@ -248,19 +248,27 @@ function Board:isLegalMoveTarget(from, to)
     return false
 end
 
+function Board:getLegalMove(from, to)
+    local moves = self.game.moves({ verbose = true, square = from })
+    if not moves then return nil end
+    for _, move in ipairs(moves) do
+        if move.to == to then
+            return move
+        end
+    end
+    return nil
+end
+
 function Board:handleMove(from, to)
     self.selected = nil
     self:clearValidMoves()
 
     local piece = self.game.get(from) 
+    local legal_move = self:getLegalMove(from, to)
 
     local is_pawn_promotion = false
-    if piece and piece.type == Chess.PAWN then
-        local to_rank_num = tonumber(to:sub(2, 2)) 
-        if (piece.color == Chess.WHITE and to_rank_num == 8) or
-           (piece.color == Chess.BLACK and to_rank_num == 1) then
-            is_pawn_promotion = true
-        end
+    if legal_move and piece and piece.type == Chess.PAWN and legal_move.promotion then
+        is_pawn_promotion = true
     end
 
     if is_pawn_promotion and self.onPromotionNeeded then
