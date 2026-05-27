@@ -1633,7 +1633,7 @@ function Kochess:openPromotionDialog(f,t,c)
         table.insert(btns, ButtonWidget:new{ icon=icons_p[type][c], width=icon_size, icon_width=icon_size, icon_height=icon_size, callback=function()
             UIManager:close(dialog)
             local m = self.game.move({from=f, to=t, promotion=char})
-            if m then self.board:handleGameMove(m); self:onMoveExecuted(m) end
+            if m then self.board:handleGameMove(m) end
         end })
     end
 
